@@ -12,6 +12,8 @@ class Feedback extends Model
     use SoftDeletes;
     protected $table = 'feedback';
 
+    protected $fillable = ['name', 'email', 'subject', 'message'];
+
     /**
      * Accessor to transform the field status value after you 
      * fetch the original data from table
@@ -20,4 +22,6 @@ class Feedback extends Model
         
         return $value === 0 ? "unprocessed" : "processed";
     }
+
+
 }

@@ -23,7 +23,7 @@ class CreateFeedbackTable extends Migration
             $table->integer('add_user')->nullable();
             $table->integer('update_user')->nullable();
             $table->integer('delete_user')->nullable();
-            $table->ipAddress('ip');
+            $table->ipAddress('ip')->nullable();
             $table->timestamps();
             $table->softDeletes(); 
         });
