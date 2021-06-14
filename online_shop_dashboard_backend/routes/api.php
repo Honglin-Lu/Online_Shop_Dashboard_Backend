@@ -3,6 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\FeedbackController;
+use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\ContractController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +24,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::Resource('feedback', FeedbackController::class);
+Route::Resource('department', DepartmentController::class);
+Route::Resource('employee', EmployeeController::class);
+Route::Resource('contract', ContractController::class);
