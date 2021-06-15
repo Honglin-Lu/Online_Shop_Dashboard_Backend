@@ -12,7 +12,7 @@ class Contract extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['type', 'starting_date', 'ending_date', 'salary', 'employee_id', 'status'];
+    protected $fillable = ['type', 'code', 'starting_date', 'ending_date', 'salary', 'employee_id', 'status'];
 
     public function getStatusAttribute($value){
         

@@ -13,9 +13,34 @@ class ContractController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $allContract = Contract::whereNotNull('id');
+
+        if($request->has('code')){
+            $allContract = Contract::where('code', $request->code);
+        }
+        if($request->has('type')){
+            $allContract = Contract::where('type', $request->type);
+        }
+        if($request->has('starting_date')){
+            $allContract = Contract::where('starting_date', $request->starting_date);
+        }
+        if($request->has('ending_date')){
+            $allContract = Contract::where('ending_date', $request->ending_date);
+        }
+        if($request->has('salary')){
+            $allContract = Contract::where('salary', $request->salary);
+        }
+        if($request->has('employee_id')){
+            $allContract = Contract::where('employee_id', $request->employee_id);
+        }
+        if($request->has('status')){
+            $allContract = Contract::where('status', $request->status);
+        }
+
+        // return response()->json($allFeedback);
+        return $allContract->paginate(3)->toJson();
     }
 
     
@@ -28,11 +53,28 @@ class ContractController extends Controller
      */
     public function store(Request $request)
     {
-        $contract = new Contract;
-        $contract->code = 'OLS001';
-        $contract->save();
-        $contract = Contract::create($request->all());
 
+        $test = '000002';
+
+        var_dump((int)$test);
+        exit;
+
+
+        $form = $request->all();
+
+        //create the contract id automatically
+        $lastData = Contract::withTrashed()->latest('id')->get();
+        if($lastData){
+            $lastCode = $lastData[0]->code;
+            $number = intval(substr($lastCode, 3));
+            $number += 1;
+            $form['code'] = 'OLS'.$number;
+        }else{
+            $form['code'] = 'OLS1000';
+        }
+
+        $contract = Contract::create($form);
+        
     }
 
     /**
@@ -43,7 +85,12 @@ class ContractController extends Controller
      */
     public function show($id)
     {
-        //
+        $contract = Contract::find($id);
+        if ($contract){
+            return $contract->toJson();
+        }else{
+            return "Invalid Id !";
+        }
     }
 
     
@@ -57,7 +104,8 @@ class ContractController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        Contract::where('id', $id)
+                ->update($request->all());
     }
 
     /**
@@ -68,6 +116,9 @@ class ContractController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // $contract = Contract::find($id);
+        // $contract->delete();
+
+        Contract::destroy($id);
     }
 }
