@@ -25,4 +25,12 @@ class Employee extends Model
         }
         return $status;
     }
+
+    public function department(){
+        return $this->belongsTo(Department::class);
+    }
+
+    public function contracts(){
+        return $this->hasMany(Contract::class);
+    }
 }

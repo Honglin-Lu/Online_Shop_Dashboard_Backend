@@ -14,4 +14,8 @@ class Department extends Model
     use NodeTrait;
 
     protected $fillable = ['name', 'parent_id', 'description'];
+
+    public function employees(){
+        return $this->hasMany(Employee::class);
+    }
 }

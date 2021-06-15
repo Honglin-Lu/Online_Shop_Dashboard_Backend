@@ -16,7 +16,7 @@ class ContractController extends Controller
     public function index(Request $request)
     {
         $allContract = Contract::whereNotNull('id');
-
+        $allContract = Contract::with('employee');
         if($request->has('code')){
             $allContract = Contract::where('code', $request->code);
         }
@@ -54,12 +54,6 @@ class ContractController extends Controller
     public function store(Request $request)
     {
 
-        $test = '000002';
-
-        var_dump((int)$test);
-        exit;
-
-
         $form = $request->all();
 
         //create the contract id automatically
@@ -87,6 +81,7 @@ class ContractController extends Controller
     {
         $contract = Contract::find($id);
         if ($contract){
+            $contract->employee = $contract->employee;
             return $contract->toJson();
         }else{
             return "Invalid Id !";
@@ -116,9 +111,8 @@ class ContractController extends Controller
      */
     public function destroy($id)
     {
-        // $contract = Contract::find($id);
-        // $contract->delete();
+        $contract = Contract::find($id);
+        $contract->delete();
 
-        Contract::destroy($id);
     }
 }

@@ -17,6 +17,7 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $allEmployee = Employee::whereNotNull('id');
+        $allEmployee = Employee::with(['department', 'contracts']);
 
         if($request->has('name')){
             $allEmployee = Employee::where('name', $request->name);
@@ -42,7 +43,7 @@ class EmployeeController extends Controller
         if($request->has('status')){
             $allEmployee = Employee::where('status', $request->status);
         }
-
+        
         return $allEmployee->paginate(3)->toJson();
     }
 
@@ -70,6 +71,10 @@ class EmployeeController extends Controller
     {
         $employee = Employee::find($id);
         if ($employee){
+            // $department = $employee->department;
+            // $employee->department = 
+            $employee->department = $employee->department;
+            $employee->contracts = $employee->contracts;
             return $employee->toJson();
         }else{
             return "Invalid Id !";

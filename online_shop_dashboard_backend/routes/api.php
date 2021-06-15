@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ContractController;
+use App\Http\Controllers\Api\CustomerController;
+
 
 
 /*
@@ -27,3 +29,4 @@ Route::Resource('feedback', FeedbackController::class);
 Route::Resource('department', DepartmentController::class);
 Route::Resource('employee', EmployeeController::class);
 Route::Resource('contract', ContractController::class);
+Route::Resource('customer', CustomerController::class);

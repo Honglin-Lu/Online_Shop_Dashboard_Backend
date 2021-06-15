@@ -18,12 +18,12 @@ class DepartmentController extends Controller
     public function index(Request $request)
     {
         $allDepartment = Department::whereNotNull('id');
-
+        $allDepartment = Department::with('employees');
         if($request->has('name')){
             $allDepartment = Department::where('name', $request->name);
         }
-        if($request->has('p_id')){
-            $allDepartment = Department::where('p_id', $request->p_id);
+        if($request->has('parent_id')){
+            $allDepartment = Department::where('parent_id', $request->parent_id);
         }
         if($request->has('description')){
             $allDepartment = Department::where('description', $request->description);
@@ -56,6 +56,7 @@ class DepartmentController extends Controller
     {
         $department = Department::find($id);
         if ($department){
+            $department->employees = $department->employees;
             return $department->toJson();
         }else{
             return "Invalid Id !";
