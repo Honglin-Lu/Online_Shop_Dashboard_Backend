@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\ProductCategoryController;
 
 
 
@@ -30,3 +32,5 @@ Route::Resource('department', DepartmentController::class);
 Route::Resource('employee', EmployeeController::class);
 Route::Resource('contract', ContractController::class);
 Route::Resource('customer', CustomerController::class);
+Route::Resource('supplier', SupplierController::class);
+Route::Resource('product-category', ProductCategoryController::class);
