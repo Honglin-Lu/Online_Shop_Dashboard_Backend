@@ -21,4 +21,12 @@ class Product extends Model
         
         return $value === 0 ? "on-sale" : "off-shelf";
     }
+
+    public function product_category(){
+        return $this->belongsTo(ProductCategory::class);
+    }
+
+    public function supplier(){
+        return $this->belongsTo(Supplier::class);
+    }
 }

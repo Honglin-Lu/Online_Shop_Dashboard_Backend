@@ -18,4 +18,8 @@ class Supplier extends Model
         
         return $value === 0 ? "normal" : "unnormal";
     }
+
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
 }
