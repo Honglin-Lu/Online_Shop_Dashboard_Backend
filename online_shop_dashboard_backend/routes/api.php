@@ -9,6 +9,10 @@ use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\ProductCategoryController;
+use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\ProductController;
+
+
 
 
 
@@ -34,3 +38,5 @@ Route::Resource('contract', ContractController::class);
 Route::Resource('customer', CustomerController::class);
 Route::Resource('supplier', SupplierController::class);
 Route::Resource('product-category', ProductCategoryController::class);
+Route::Resource('file', FileController::class);
+Route::Resource('product', ProductController::class);
