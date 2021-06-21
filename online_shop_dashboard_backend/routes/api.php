@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\ProductCategoryController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\VatController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ProductOrderFlashController;
 
 
 
@@ -40,3 +43,5 @@ Route::Resource('supplier', SupplierController::class);
 Route::Resource('product-category', ProductCategoryController::class);
 Route::Resource('file', FileController::class);
 Route::Resource('product', ProductController::class);
+Route::Resource('vat', VatController::class);
+Route::Resource('order', OrderController::class);
