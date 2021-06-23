@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductOrderFlash;
+
 
 
 class OrderController extends Controller
@@ -18,6 +20,8 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $allOrder = Order::whereNotNull('id');
+        $allOrder = Order::with(['vat', 'flashes']);
+
 
         if($request->has('customer_id')){
             $allOrder = Order::where('customer_id', $request->customer_id);
@@ -59,7 +63,18 @@ class OrderController extends Controller
 
         $form['subtotal'] = $subtotal;
         
-        $order = Order::create($form);
+        $lastOrder = Order::create($form)->latest('id')->get();
+        // store data to the product-order-flash table
+        $orderId = $lastOrder[0]->id;
+        foreach ($infos as $x => $x_value){
+            $product = Product::where('id', $x)
+                             ->first()->toJson();
+            $flash = new ProductOrderFlash();
+            $flash->product_id = $x;
+            $flash->order_id = $orderId;
+            $flash->product_info = $product;
+            $flash->save();
+        }
 
     }
 
@@ -73,6 +88,8 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
         if ($order){
+            $order->vat = $order->vat;
+            $order->flashes = $order->flashes;
             return $order->toJson();
         }else{
             return "Invalid Id !";

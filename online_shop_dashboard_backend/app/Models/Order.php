@@ -26,4 +26,12 @@ class Order extends Model
         return $status;
     }
 
+    public function flashes(){
+        return $this->hasMany(ProductOrderFlash::class);
+    }
+
+    public function vat(){
+        return $this->belongsTo(Vat::class);
+    }
+
 }

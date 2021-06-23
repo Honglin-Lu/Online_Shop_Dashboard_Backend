@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Vat extends Model
+class Article extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['province_name', 'federal_rate', 'province_rate'];
+    protected $fillable = ['title', 'content', 'article_category_id'];
 
-    public function order(){
-        return $this->hasMany(Order::class);
+    public function article_category(){
+        return $this->belongsTo(ArticleCategory::class);
     }
 }

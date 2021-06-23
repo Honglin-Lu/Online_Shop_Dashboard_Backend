@@ -17,5 +17,7 @@ class ProductOrderFlash extends Model
 
     protected $fillable = ['product_id', 'order_id', 'product_info'];
 
-
+    public function order(){
+        return $this->belongsTo(Order::class);
+    }
 }
