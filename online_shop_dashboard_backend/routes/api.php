@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductOrderFlashController;
 use App\Http\Controllers\Api\ArticleCategoryController;
 use App\Http\Controllers\Api\ArticleController;
+use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\AuthController;
 
 
 
@@ -50,5 +52,19 @@ Route::Resource('order', OrderController::class);
 Route::Resource('product-order-flash', ProductOrderFlashController::class);
 Route::Resource('article-category', ArticleCategoryController::class);
 Route::Resource('article', ArticleController::class);
+Route::Resource('banner', BannerController::class);
+
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'auth'
+
+], function ($router) {
+
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('me', [AuthController::class, 'me']);
 
 
+});
