@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\User;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
 
 
 
-class EmployeeController extends Controller
+class EmployeeController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -49,7 +50,13 @@ class EmployeeController extends Controller
             $allEmployee = Employee::where('status', $request->status);
         }
         
-        return $allEmployee->paginate(3)->toJson();
+        //return $allEmployee->paginate(3)->toJson();
+        $employee = $allEmployee->paginate(3);
+        if($employee){
+            return $this->successResponse($employee);
+        }else{
+            return $this->successResponse(null, 'No Employee', 404);
+        }
     }
 
     
@@ -63,6 +70,11 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $employee = Employee::create($request->all());
+        if($employee){
+            return $this->successResponse($employee, 'Employee Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
         
     }
 
@@ -80,9 +92,10 @@ class EmployeeController extends Controller
             // $employee->department = 
             $employee->department = $employee->department;
             $employee->contracts = $employee->contracts;
-            return $employee->toJson();
+            //return $employee->toJson();
+            return $this->successResponse($employee);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -98,13 +111,20 @@ class EmployeeController extends Controller
     public function update(Request $request, $id)
     {
         
-        if (! Gate::allows('update-employee', auth()->user())) {
-            abort(403);
-        }
+        // if (! Gate::allows('update-employee', auth()->user())) {
+        //     abort(403);
+        // }
 
         
-        Employee::where('id', $id)
+        $result = Employee::where('id', $id)
                 ->update($request->all());
+        
+        if ($result === 1){
+            $employee = Employee::find($id);
+            return $this->successResponse($employee, 'Employee Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -117,5 +137,11 @@ class EmployeeController extends Controller
     {
         $employee = Employee::find($id);
         $employee->delete();
+
+        if ($employee->trashed()){
+            return $this->successResponse(null, 'Employee Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
     }
 }
