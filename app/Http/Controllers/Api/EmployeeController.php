@@ -25,31 +25,40 @@ class EmployeeController extends ApiController
         $allEmployee = Employee::whereNotNull('id');
         $allEmployee = Employee::with(['department', 'contracts']);
 
-        if($request->has('name')){
-            $allEmployee = Employee::where('name', $request->name);
-        }
-        if($request->has('email')){
-            $allEmployee = Employee::where('email', $request->email);
-        }
-        if($request->has('phone')){
-            $allEmployee = Employee::where('phone', $request->phone);
-        }
-        if($request->has('birthdate')){
-            $allEmployee = Employee::where('birthdate', $request->birthdate);
-        }
-        if($request->has('address')){
-            $allEmployee = Employee::where('address', $request->address);
-        }
-        if($request->has('contract_id')){
-            $allEmployee = Employee::where('contract_id', $request->contract_id);
-        }
-        if($request->has('department_id')){
-            $allEmployee = Employee::where('department_id', $request->department_id);
-        }
-        if($request->has('status')){
-            $allEmployee = Employee::where('status', $request->status);
-        }
-        
+        // if($request->has('name')){
+        //     $allEmployee = Employee::where('name', $request->name);
+        // }
+        // if($request->has('email')){
+        //     $allEmployee = Employee::where('email', $request->email);
+        // }
+        // if($request->has('phone')){
+        //     $allEmployee = Employee::where('phone', $request->phone);
+        // }
+        // if($request->has('birthdate')){
+        //     $allEmployee = Employee::where('birthdate', $request->birthdate);
+        // }
+        // if($request->has('address')){
+        //     $allEmployee = Employee::where('address', $request->address);
+        // }
+        // if($request->has('contract_id')){
+        //     $allEmployee = Employee::where('contract_id', $request->contract_id);
+        // }
+        // if($request->has('department_id')){
+        //     $allEmployee = Employee::where('department_id', $request->department_id);
+        // }
+        // if($request->has('status')){
+        //     $allEmployee = Employee::where('status', $request->status);
+        // }
+        $search = $request->input('q');
+        $allEmployee = Employee::query()
+                    ->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
+                    ->orWhere('address', 'LIKE', "%{$search}%")
+                    ->orWhere('birthdate', 'LIKE', "%{$search}%");
+
+
+
         //return $allEmployee->paginate(3)->toJson();
         $employee = $allEmployee->paginate(3);
         if($employee){
@@ -69,6 +78,7 @@ class EmployeeController extends ApiController
      */
     public function store(Request $request)
     {
+        
         $employee = Employee::create($request->all());
         if($employee){
             return $this->successResponse($employee, 'Employee Created', 201);
