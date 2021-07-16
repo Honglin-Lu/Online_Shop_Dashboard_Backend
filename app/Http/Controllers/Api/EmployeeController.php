@@ -7,6 +7,8 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\User;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 
 use Illuminate\Support\Facades\Gate;
@@ -78,7 +80,19 @@ class EmployeeController extends ApiController
      */
     public function store(Request $request)
     {
-        
+        // Validate the incoming HTTP requests
+        // stopping on first validation failure:bail
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:employees|digits:10',
+            'birthdate' => 'required|date',
+            'email' => 'bail|required|unique:employees|email|max:200',
+            'address' => 'nullable|max:200',
+            'contract_id' => 'nullable|integer',
+            'department_id' => 'required|integer',
+        ]);
+
+
         $employee = Employee::create($request->all());
         if($employee){
             return $this->successResponse($employee, 'Employee Created', 201);
@@ -125,6 +139,17 @@ class EmployeeController extends ApiController
         //     abort(403);
         // }
 
+
+
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:employees,phone,'. $id .'|digits:10',
+            'birthdate' => 'required|date',
+            'email' => 'bail|required|unique:employees,email,'. $id .'|email|max:200',
+            'address' => 'nullable|max:200',
+            'contract_id' => 'nullable|integer',
+            'department_id' => 'required|integer',
+        ]);
         
         $result = Employee::where('id', $id)
                 ->update($request->all());
