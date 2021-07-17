@@ -25,7 +25,6 @@ class EmployeeController extends ApiController
     public function index(Request $request)
     {
         $allEmployee = Employee::whereNotNull('id');
-        $allEmployee = Employee::with(['department', 'contracts']);
 
         // if($request->has('name')){
         //     $allEmployee = Employee::where('name', $request->name);
@@ -60,6 +59,7 @@ class EmployeeController extends ApiController
                     ->orWhere('birthdate', 'LIKE', "%{$search}%");
 
 
+        $allEmployee = Employee::with(['department', 'contracts']);
 
         //return $allEmployee->paginate(3)->toJson();
         $employee = $allEmployee->paginate(3);

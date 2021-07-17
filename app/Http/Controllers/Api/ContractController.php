@@ -56,7 +56,7 @@ class ContractController extends Controller
 
         $form = $request->all();
 
-        //create the contract id automatically
+        //create the contract code automatically
         $lastData = Contract::withTrashed()->latest('id')->get();
         if($lastData){
             $lastCode = $lastData[0]->code;

@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\ArticleCategoryController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConfigureController;
 
 
 
@@ -68,3 +69,6 @@ Route::group([
 
 
 });
+
+Route::get('configure', [ConfigureController::class, 'getConfigration']);
+
