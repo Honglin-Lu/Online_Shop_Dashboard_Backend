@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Contract;
 
-class ContractController extends Controller
+class ContractController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -16,31 +17,39 @@ class ContractController extends Controller
     public function index(Request $request)
     {
         $allContract = Contract::whereNotNull('id');
-        $allContract = Contract::with('employee');
-        if($request->has('code')){
-            $allContract = Contract::where('code', $request->code);
-        }
-        if($request->has('type')){
-            $allContract = Contract::where('type', $request->type);
-        }
-        if($request->has('starting_date')){
-            $allContract = Contract::where('starting_date', $request->starting_date);
-        }
-        if($request->has('ending_date')){
-            $allContract = Contract::where('ending_date', $request->ending_date);
-        }
-        if($request->has('salary')){
-            $allContract = Contract::where('salary', $request->salary);
-        }
-        if($request->has('employee_id')){
-            $allContract = Contract::where('employee_id', $request->employee_id);
-        }
-        if($request->has('status')){
-            $allContract = Contract::where('status', $request->status);
-        }
+        //$allContract = Contract::with('employee');
+        // if($request->has('code')){
+        //     $allContract = Contract::where('code', $request->code);
+        // }
+        // if($request->has('type')){
+        //     $allContract = Contract::where('type', $request->type);
+        // }
+        // if($request->has('starting_date')){
+        //     $allContract = Contract::where('starting_date', $request->starting_date);
+        // }
+        // if($request->has('ending_date')){
+        //     $allContract = Contract::where('ending_date', $request->ending_date);
+        // }
+        // if($request->has('salary')){
+        //     $allContract = Contract::where('salary', $request->salary);
+        // }
+        // if($request->has('employee_id')){
+        //     $allContract = Contract::where('employee_id', $request->employee_id);
+        // }
+        // if($request->has('status')){
+        //     $allContract = Contract::where('status', $request->status);
+        // }
 
-        // return response()->json($allFeedback);
-        return $allContract->paginate(3)->toJson();
+        $allContract = Contract::with('employee');
+
+
+        //return $allContract->paginate(3)->toJson();
+        $contract = $allContract->paginate(3);
+        if($contract){
+            return $this->successResponse($contract);
+        }else{
+            return $this->successResponse(null, 'No Contract', 404);
+        }
     }
 
     
@@ -58,16 +67,24 @@ class ContractController extends Controller
 
         //create the contract code automatically
         $lastData = Contract::withTrashed()->latest('id')->get();
-        if($lastData){
+        // dump($lastData->isEmpty());
+        // exit;
+        if($lastData->isEmpty()){
+            $form['code'] = 'OLS1000';
+            
+        }else{
             $lastCode = $lastData[0]->code;
             $number = intval(substr($lastCode, 3));
             $number += 1;
             $form['code'] = 'OLS'.$number;
-        }else{
-            $form['code'] = 'OLS1000';
         }
 
         $contract = Contract::create($form);
+        if($contract){
+            return $this->successResponse($contract, 'Contract Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
         
     }
 
@@ -82,9 +99,9 @@ class ContractController extends Controller
         $contract = Contract::find($id);
         if ($contract){
             $contract->employee = $contract->employee;
-            return $contract->toJson();
+            return $this->successResponse($contract);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -99,8 +116,15 @@ class ContractController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Contract::where('id', $id)
+        $result = Contract::where('id', $id)
                 ->update($request->all());
+               
+        if ($result === 1){
+            $contract = Contract::find($id);
+            return $this->successResponse($contract, 'Contract Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -113,6 +137,12 @@ class ContractController extends Controller
     {
         $contract = Contract::find($id);
         $contract->delete();
+
+        if ($contract->trashed()){
+            return $this->successResponse(null, 'Contract Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
 
     }
 }
