@@ -21,14 +21,20 @@ class Contract extends Model
 
     public function getTypeAttribute($value){
         
-        if($value === 0){
-            $type = "permanent";
-        }elseif($value === 1){
-            $type = "fixed-term";
-        }else{
-            $type = "casual";
-        }
-        return $type;
+        $contract_type = config('custom.contract.type');
+        return [
+            'type_id' => $value,
+            'type_name' => array_flip($contract_type)[$value]
+        ];
+        // return $contract_type[$value];
+        // if($value === 0){
+        //     $type = "permanent";
+        // }elseif($value === 1){
+        //     $type = "fixed-term";
+        // }else{
+        //     $type = "casual";
+        // }
+        // return $type;
     }
 
     public function employee(){
