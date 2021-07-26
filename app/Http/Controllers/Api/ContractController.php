@@ -16,31 +16,24 @@ class ContractController extends ApiController
      */
     public function index(Request $request)
     {
-        $allContract = Contract::whereNotNull('id');
-        //$allContract = Contract::with('employee');
-        // if($request->has('code')){
-        //     $allContract = Contract::where('code', $request->code);
-        // }
-        // if($request->has('type')){
-        //     $allContract = Contract::where('type', $request->type);
-        // }
-        // if($request->has('starting_date')){
-        //     $allContract = Contract::where('starting_date', $request->starting_date);
-        // }
-        // if($request->has('ending_date')){
-        //     $allContract = Contract::where('ending_date', $request->ending_date);
-        // }
-        // if($request->has('salary')){
-        //     $allContract = Contract::where('salary', $request->salary);
-        // }
-        // if($request->has('employee_id')){
-        //     $allContract = Contract::where('employee_id', $request->employee_id);
-        // }
-        // if($request->has('status')){
-        //     $allContract = Contract::where('status', $request->status);
-        // }
+        
+        $search = $request->input('q');
+        if ($search){
+            $allContract = Contract::with('employee')
+                    ->where('code', 'LIKE', "%{$search}%")
+                    ->orWhere('starting_date', 'LIKE', "%{$search}%")
+                    ->orWhere('ending_date', 'LIKE', "%{$search}%")
+                    ->orWhere('salary', 'LIKE', "%{$search}%")
+                    //->orWhere('type', 'LIKE', "%{$search}%")
+                    ->orWhere('status', 'LIKE', "%{$search}%");
+        }else{
+            $allContract = Contract::with('employee')->whereNotNull('id');
 
-        $allContract = Contract::with('employee');
+        }
+        
+
+
+        //$allContract = Contract::with('employee');
 
 
         //return $allContract->paginate(3)->toJson();

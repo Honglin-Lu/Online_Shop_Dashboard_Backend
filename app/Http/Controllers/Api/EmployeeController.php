@@ -24,45 +24,25 @@ class EmployeeController extends ApiController
      */
     public function index(Request $request)
     {
-        $allEmployee = Employee::whereNotNull('id');
-
-        // if($request->has('name')){
-        //     $allEmployee = Employee::where('name', $request->name);
-        // }
-        // if($request->has('email')){
-        //     $allEmployee = Employee::where('email', $request->email);
-        // }
-        // if($request->has('phone')){
-        //     $allEmployee = Employee::where('phone', $request->phone);
-        // }
-        // if($request->has('birthdate')){
-        //     $allEmployee = Employee::where('birthdate', $request->birthdate);
-        // }
-        // if($request->has('address')){
-        //     $allEmployee = Employee::where('address', $request->address);
-        // }
-        // if($request->has('contract_id')){
-        //     $allEmployee = Employee::where('contract_id', $request->contract_id);
-        // }
-        // if($request->has('department_id')){
-        //     $allEmployee = Employee::where('department_id', $request->department_id);
-        // }
-        // if($request->has('status')){
-        //     $allEmployee = Employee::where('status', $request->status);
-        // }
+        
         $search = $request->input('q');
-        $allEmployee = Employee::query()
-                    ->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('email', 'LIKE', "%{$search}%")
-                    ->orWhere('phone', 'LIKE', "%{$search}%")
-                    ->orWhere('address', 'LIKE', "%{$search}%")
-                    ->orWhere('birthdate', 'LIKE', "%{$search}%");
+        if ($search){
+            $allEmployee = Employee::with(['department', 'contracts'])
+                ->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%")
+                ->orWhere('address', 'LIKE', "%{$search}%")
+                ->orWhere('birthdate', 'LIKE', "%{$search}%");
+        } else {
+            $allEmployee = Employee::with(['department', 'contracts'])
+                ->whereNotNull('id');
+        }
 
-
-        $allEmployee = Employee::with(['department', 'contracts']);
+        // $allEmployee = Employee::with(['department', 'contracts']);
 
         //return $allEmployee->paginate(3)->toJson();
         $employee = $allEmployee->paginate(3);
+
         if($employee){
             return $this->successResponse($employee);
         }else{
