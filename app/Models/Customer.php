@@ -12,11 +12,16 @@ class Customer extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'phone', 'address'];
+    protected $fillable = ['name', 'email', 'phone', 'address', 'status'];
 
     public function getStatusAttribute($value){
+        $customer_status = config('custom.customer.status');
+        return [
+            'status_id' => $value,
+            'status_name' => array_flip($customer_status)[$value]
+        ];
         
-        return $value === 0 ? "normal" : "unnormal";
+        //return $value === 0 ? "normal" : "unnormal";
     }
 
 }

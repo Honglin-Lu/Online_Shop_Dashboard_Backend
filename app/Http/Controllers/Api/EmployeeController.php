@@ -69,7 +69,7 @@ class EmployeeController extends ApiController
             'email' => 'bail|required|unique:employees|email|max:200',
             'address' => 'nullable|max:200',
             'contract_id' => 'nullable|integer',
-            'department_id' => 'required|integer',
+            'department_id' => 'required',
         ]);
 
 

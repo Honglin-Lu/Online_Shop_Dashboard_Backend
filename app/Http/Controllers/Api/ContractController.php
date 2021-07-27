@@ -20,12 +20,11 @@ class ContractController extends ApiController
         $search = $request->input('q');
         if ($search){
             $allContract = Contract::with('employee')
-                    ->where('code', 'LIKE', "%{$search}%")
-                    ->orWhere('starting_date', 'LIKE', "%{$search}%")
-                    ->orWhere('ending_date', 'LIKE', "%{$search}%")
-                    ->orWhere('salary', 'LIKE', "%{$search}%")
-                    //->orWhere('type', 'LIKE', "%{$search}%")
-                    ->orWhere('status', 'LIKE', "%{$search}%");
+                    ->where('code', 'LIKE', "%{$search}%");
+                    // ->orWhere('starting_date', 'LIKE', "%{$search}%")
+                    // ->orWhere('ending_date', 'LIKE', "%{$search}%")
+                    // ->orWhere('salary', 'LIKE', "%{$search}%")
+                    // ->orWhere('status', 'LIKE', "%{$search}%");
         }else{
             $allContract = Contract::with('employee')->whereNotNull('id');
 
@@ -55,6 +54,13 @@ class ContractController extends ApiController
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'starting_date' => 'required|date',
+            'ending_date' => 'required|date|after:starting_date',
+            'salary' => 'required|required|regex:/^\d+(\.\d{1,2})?$/',
+            'type' => 'required',
+        ]);
+
 
         $form = $request->all();
 
@@ -109,6 +115,13 @@ class ContractController extends ApiController
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'starting_date' => 'required|date',
+            'ending_date' => 'required|date|after:starting_date',
+            'salary' => 'required|required|regex:/^\d+(\.\d{1,2})?$/',
+            'type' => 'required',
+        ]);
+        
         $result = Contract::where('id', $id)
                 ->update($request->all());
                

@@ -19,17 +19,14 @@ class CustomerController extends ApiController
     {
         $allCustomer = Customer::whereNotNull('id');
 
-        if($request->has('name')){
-            $allCustomer = Customer::where('name', $request->name);
-        }
-        if($request->has('email')){
-            $allCustomer = Customer::where('email', $request->email);
-        }
-        if($request->has('phone')){
-            $allCustomer = Customer::where('phone', $request->phone);
-        }
-        if($request->has('address')){
-            $allCustomer = Customer::where('address', $request->address);
+        $search = $request->input('q');
+        if ($search){
+            $allCustomer = Customer::where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%")
+                ->orWhere('address', 'LIKE', "%{$search}%");
+        } else {
+            $allCustomer = Customer::whereNotNull('id');
         }
 
         //return $allCustomer->paginate(3)->toJson();
@@ -51,6 +48,15 @@ class CustomerController extends ApiController
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:customers|digits:10',
+            'email' => 'bail|required|unique:customers|email|max:200',
+            'address' => 'nullable|max:200',
+            'status' => 'required',
+        ]);
+
+
         $customer = Customer::create($request->all());
         if($customer){
             return $this->successResponse($customer, 'Customer Created', 201);
@@ -86,6 +92,14 @@ class CustomerController extends ApiController
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:customers,phone,'. $id .'|digits:10',
+            'email' => 'bail|required|unique:customers,email,'. $id .'|email|max:200',
+            'address' => 'nullable|max:200',
+            'status' => 'required',
+        ]);
+
         $result = Customer::where('id', $id)
                 ->update($request->all());
         // If the update is successful, the result equals to 1, and if the update is unsuccessful, the result is 0.

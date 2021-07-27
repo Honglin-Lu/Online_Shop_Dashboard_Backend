@@ -8,4 +8,12 @@
                  "casual" => 2
             ],
         ],
+
+        'customer' => [
+            'status' => [
+                "normal" => 0,
+                "unormal" => 1
+            ],
+
+        ],
     ];
