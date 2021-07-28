@@ -18,8 +18,12 @@ class Product extends Model
 
 
     public function getStatusAttribute($value){
-        
-        return $value === 0 ? "on-sale" : "off-shelf";
+        $product_status = config('custom.product.status');
+        return [
+            'status_id' => $value,
+            'status_name' => array_flip($product_status)[$value]
+        ];
+        //return $value === 0 ? "on-sale" : "off-shelf";
     }
 
     public function product_category(){

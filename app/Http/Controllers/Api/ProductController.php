@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Product;
 
 
-class ProductController extends Controller
+class ProductController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -16,32 +17,25 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $allProduct = Product::whereNotNull('id');
-        $allProduct = Product::with(['product_category', 'supplier']);
-
-        if($request->has('name')){
-            $allProduct = Product::where('name', $request->name);
-        }
-        if($request->has('product_category_id')){
-            $allProduct = Product::where('product_category_id', $request->product_category_id);
-        }
-        if($request->has('supplier_id')){
-            $allProduct = Product::where('supplier_id', $request->supplier_id);
-        }
-        if($request->has('buying_price')){
-            $allProduct = Product::where('buying_price', '<', $request->buying_price);
-        }
-        if($request->has('selling_price')){
-            $allProduct = Product::where('selling_price', '<', $request->selling_price);
-        }
-        if($request->has('quantity')){
-            $allProduct = Product::where('quantity', '>', $request->quantity);
-        }
-        if($request->has('status')){
-            $allProduct = Product::where('status', $request->status);
+       
+        $search = $request->input('q');
+        if ($search){
+            $allProduct = Product::with(['product_category', 'supplier'])
+                ->where('name', 'LIKE', "%{$search}%");
+                
+        } else {
+            $allProduct = Product::with(['product_category', 'supplier'])
+                ->whereNotNull('id');
         }
 
-        return $allProduct->paginate(3)->toJson();
+
+        $product = $allProduct->paginate(3);
+
+        if($product){
+            return $this->successResponse($product);
+        }else{
+            return $this->successResponse(null, 'No Product', 404);
+        }
     }
 
     
@@ -54,7 +48,22 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'buying_price' => 'bail|required|regex:/^\d+(\.\d{1,2})?$/',
+            'selling_price' => 'bail|required|regex:/^\d+(\.\d{1,2})?$/',
+            'quantity' => 'bail|required|integer|min:0',
+            'description' => 'nullable|max:1000',
+            'status' => 'required',
+        ]);
+
         $product = Product::create($request->all());
+        if($product){
+            return $this->successResponse($product, 'Product Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
 
     }
 
@@ -70,9 +79,11 @@ class ProductController extends Controller
         if ($product){
             $product->product_category = $product->product_category;
             $product->supplier = $product->supplier;
-            return $product->toJson();
+           // return $product->toJson();
+            return $this->successResponse($product);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
+
         }
     }
 
@@ -87,8 +98,23 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Product::where('id', $id)
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'buying_price' => 'bail|required|regex:/^\d+(\.\d{1,2})?$/',
+            'selling_price' => 'bail|required|regex:/^\d+(\.\d{1,2})?$/',
+            'quantity' => 'bail|required|integer|min:0',
+            'description' => 'nullable|max:1000',
+            'status' => 'required',
+        ]);
+        
+        $result = Product::where('id', $id)
                 ->update($request->all());
+        if ($result === 1){
+            $product = Product::find($id);
+            return $this->successResponse($product, 'Product Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -99,6 +125,13 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        Product::destroy($id);
+        $product = Product::find($id);
+        $product->delete();
+
+        if ($product->trashed()){
+            return $this->successResponse(null, 'Product Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
     }
 }

@@ -15,8 +15,13 @@ class Supplier extends Model
     protected $fillable = ['name', 'email', 'phone', 'address'];
 
     public function getStatusAttribute($value){
+        $supplier_status = config('custom.supplier.status');
+        return [
+            'status_id' => $value,
+            'status_name' => array_flip($supplier_status)[$value]
+        ];
         
-        return $value === 0 ? "normal" : "unnormal";
+        //return $value === 0 ? "normal" : "unnormal";
     }
 
     public function products(){

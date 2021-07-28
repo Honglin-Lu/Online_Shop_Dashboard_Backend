@@ -17,7 +17,6 @@ class CustomerController extends ApiController
      */
     public function index(Request $request)
     {
-        $allCustomer = Customer::whereNotNull('id');
 
         $search = $request->input('q');
         if ($search){

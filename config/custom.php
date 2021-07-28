@@ -16,4 +16,20 @@
             ],
 
         ],
+
+        'supplier' => [
+            'status' => [
+                "normal" => 0,
+                "unormal" => 1
+            ],
+
+        ],
+
+        'product' => [
+            'status' => [
+                "on-sale" => 0,
+                "off-shelf" => 1
+            ],
+
+        ],
     ];

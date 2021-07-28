@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Supplier;
 
 
-class SupplierController extends Controller
+class SupplierController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -16,22 +17,25 @@ class SupplierController extends Controller
      */
     public function index(Request $request)
     {
-        $allSupplier = Supplier::whereNotNull('id');
 
-        if($request->has('name')){
-            $allSupplier = Supplier::where('name', $request->name);
-        }
-        if($request->has('email')){
-            $allSupplier = Supplier::where('email', $request->email);
-        }
-        if($request->has('phone')){
-            $allSupplier = Supplier::where('phone', $request->phone);
-        }
-        if($request->has('address')){
-            $allSupplier = Supplier::where('address', $request->address);
+
+
+        $search = $request->input('q');
+        if ($search){
+            $allSupplier = Supplier::where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%")
+                ->orWhere('address', 'LIKE', "%{$search}%");
+        } else {
+            $allSupplier = Supplier::whereNotNull('id');
         }
 
-        return $allSupplier->paginate(3)->toJson();
+        $supplier = $allSupplier->paginate(3);
+        if($supplier){
+            return $this->successResponse($supplier);
+        }else{
+            return $this->successResponse(null, 'No Supplier', 404);
+        }
     }
 
     
@@ -44,7 +48,21 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:suppliers|digits:10',
+            'email' => 'bail|required|unique:suppliers|email|max:200',
+            'address' => 'nullable|max:200',
+            'status' => 'required',
+        ]);
+
+
         $supplier = Supplier::create($request->all());
+        if($supplier){
+            return $this->successResponse($supplier, 'Supplier Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
 
     }
 
@@ -56,11 +74,12 @@ class SupplierController extends Controller
      */
     public function show($id)
     {
+       
         $supplier = Supplier::find($id);
         if ($supplier){
-            return $supplier->toJson();
+            return $this->successResponse($supplier);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -74,8 +93,23 @@ class SupplierController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Supplier::where('id', $id)
+        $request->validate([
+            'name' => 'bail|required|max:100',
+            'phone' => 'bail|required|unique:suppliers,phone,'. $id .'|digits:10',
+            'email' => 'bail|required|unique:suppliers,email,'. $id .'|email|max:200',
+            'address' => 'nullable|max:200',
+            'status' => 'required',
+        ]);
+
+        $result = Supplier::where('id', $id)
                 ->update($request->all());
+        // If the update is successful, the result equals to 1, and if the update is unsuccessful, the result is 0.
+        if ($result === 1){
+            $supplier = Supplier::find($id);
+            return $this->successResponse($supplier, 'Supplier Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -86,7 +120,14 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        Supplier::destroy($id);
+        $supplier = Supplier::find($id);
+        $supplier->delete();
+        //Customer::destroy($id);
+        if ($supplier->trashed()){
+            return $this->successResponse(null, 'Supplier Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
 
     }
 }
