@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Feedback;
 
-class FeedbackController extends Controller
+class FeedbackController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -31,7 +32,13 @@ class FeedbackController extends Controller
         }
 
         // return response()->json($allFeedback);
-        return $allFeedback->paginate(3)->toJson();
+        $feedback = $allFeedback->paginate(3);
+
+        if($feedback){
+            return $this->successResponse($feedback);
+        }else{
+            return $this->successResponse(null, 'No Feedback', 404);
+        }
     }
 
     
@@ -45,7 +52,11 @@ class FeedbackController extends Controller
     public function store(Request $request)
     {
         $feedback = Feedback::create($request->all());
-        // add status later!!!
+        if($feedback){
+            return $this->successResponse($feedback, 'Feedback Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
     }
 
     /**
@@ -58,9 +69,9 @@ class FeedbackController extends Controller
     {
         $feedback = Feedback::find($id);
         if ($feedback){
-            return $feedback->toJson();
+            return $this->successResponse($feedback);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -75,8 +86,14 @@ class FeedbackController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Feedback::where('id', $id)
+        $result = Feedback::where('id', $id)
                 ->update($request->all());
+        if ($result === 1){
+            $feedback = Feedback::find($id);
+            return $this->successResponse($feedback, 'Feedback Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -89,5 +106,11 @@ class FeedbackController extends Controller
     {
         $feedback = Feedback::find($id);
         $feedback->delete();
+
+        if ($feedback->trashed()){
+            return $this->successResponse(null, 'Feedback Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
     }
 }
