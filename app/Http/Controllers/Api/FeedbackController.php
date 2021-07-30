@@ -16,19 +16,15 @@ class FeedbackController extends ApiController
      */
     public function index(Request $request)
     {
-        $allFeedback = Feedback::whereNotNull('id');
-
-        if($request->has('name')){
-            $allFeedback = Feedback::where('name', $request->name);
-        }
-        if($request->has('email')){
-            $allFeedback = Feedback::where('email', $request->email);
-        }
-        if($request->has('subject')){
-            $allFeedback = Feedback::where('subject', $request->subject);
-        }
-        if($request->has('status')){
-            $allFeedback = Feedback::where('status', $request->status);
+        
+        $search = $request->input('q');
+        if ($search){
+            $allFeedback = Feedback::where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('subject', 'LIKE', "%{$search}%")
+                ->orWhere('message', 'LIKE', "%{$search}%");
+        } else {
+            $allFeedback = Feedback::whereNotNull('id');
         }
 
         // return response()->json($allFeedback);

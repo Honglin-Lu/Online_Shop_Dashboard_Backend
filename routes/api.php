@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConfigureController;
+use App\Http\Controllers\Api\FeedbackAnswerController;
+
 
 
 
@@ -54,6 +56,9 @@ Route::Resource('product-order-flash', ProductOrderFlashController::class);
 Route::Resource('article-category', ArticleCategoryController::class);
 Route::Resource('article', ArticleController::class);
 Route::Resource('banner', BannerController::class);
+
+Route::get('/feedback-answer/answers/{id}', [FeedbackAnswerController::class, 'getAnswers']);
+Route::Resource('feedback-answer', FeedbackAnswerController::class);
 
 Route::group([
 
