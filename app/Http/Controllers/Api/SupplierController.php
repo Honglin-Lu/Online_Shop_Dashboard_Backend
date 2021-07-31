@@ -25,9 +25,10 @@ class SupplierController extends ApiController
             $allSupplier = Supplier::where('name', 'LIKE', "%{$search}%")
                 ->orWhere('email', 'LIKE', "%{$search}%")
                 ->orWhere('phone', 'LIKE', "%{$search}%")
-                ->orWhere('address', 'LIKE', "%{$search}%");
+                ->orWhere('address', 'LIKE', "%{$search}%")
+                ->orderBy('id', 'desc');
         } else {
-            $allSupplier = Supplier::whereNotNull('id');
+            $allSupplier = Supplier::whereNotNull('id')->orderBy('id', 'desc');
         }
 
         $supplier = $allSupplier->paginate(3);

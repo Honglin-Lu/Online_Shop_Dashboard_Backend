@@ -20,13 +20,14 @@ class ContractController extends ApiController
         $search = $request->input('q');
         if ($search){
             $allContract = Contract::with('employee')
-                    ->where('code', 'LIKE', "%{$search}%");
+                    ->where('code', 'LIKE', "%{$search}%")
+                    ->orderBy('id', 'desc');
                     // ->orWhere('starting_date', 'LIKE', "%{$search}%")
                     // ->orWhere('ending_date', 'LIKE', "%{$search}%")
                     // ->orWhere('salary', 'LIKE', "%{$search}%")
                     // ->orWhere('status', 'LIKE', "%{$search}%");
         }else{
-            $allContract = Contract::with('employee')->whereNotNull('id');
+            $allContract = Contract::with('employee')->whereNotNull('id')->orderBy('id', 'desc');
 
         }
         

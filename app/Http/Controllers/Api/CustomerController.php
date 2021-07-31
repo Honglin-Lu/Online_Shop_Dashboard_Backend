@@ -23,9 +23,10 @@ class CustomerController extends ApiController
             $allCustomer = Customer::where('name', 'LIKE', "%{$search}%")
                 ->orWhere('email', 'LIKE', "%{$search}%")
                 ->orWhere('phone', 'LIKE', "%{$search}%")
-                ->orWhere('address', 'LIKE', "%{$search}%");
+                ->orWhere('address', 'LIKE', "%{$search}%")
+                ->orderBy('id', 'desc');
         } else {
-            $allCustomer = Customer::whereNotNull('id');
+            $allCustomer = Customer::whereNotNull('id')->orderBy('id', 'desc');
         }
 
         //return $allCustomer->paginate(3)->toJson();

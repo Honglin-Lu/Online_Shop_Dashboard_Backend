@@ -32,10 +32,11 @@ class EmployeeController extends ApiController
                 ->orWhere('email', 'LIKE', "%{$search}%")
                 ->orWhere('phone', 'LIKE', "%{$search}%")
                 ->orWhere('address', 'LIKE', "%{$search}%")
-                ->orWhere('birthdate', 'LIKE', "%{$search}%");
+                ->orWhere('birthdate', 'LIKE', "%{$search}%")
+                ->orderBy('id', 'desc');
         } else {
             $allEmployee = Employee::with(['department', 'contracts'])
-                ->whereNotNull('id');
+                ->whereNotNull('id')->orderBy('id', 'desc');
         }
 
         // $allEmployee = Employee::with(['department', 'contracts']);

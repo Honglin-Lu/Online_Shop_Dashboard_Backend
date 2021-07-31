@@ -22,9 +22,10 @@ class FeedbackController extends ApiController
             $allFeedback = Feedback::where('name', 'LIKE', "%{$search}%")
                 ->orWhere('email', 'LIKE', "%{$search}%")
                 ->orWhere('subject', 'LIKE', "%{$search}%")
-                ->orWhere('message', 'LIKE', "%{$search}%");
+                ->orWhere('message', 'LIKE', "%{$search}%")
+                ->orderBy('id', 'desc');
         } else {
-            $allFeedback = Feedback::whereNotNull('id');
+            $allFeedback = Feedback::whereNotNull('id')->orderBy('id', 'desc');
         }
 
         // return response()->json($allFeedback);

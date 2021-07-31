@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Vat;
 
 
-class VatController extends Controller
+class VatController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -16,20 +17,22 @@ class VatController extends Controller
      */
     public function index(Request $request)
     {
-        $allVat = Vat::whereNotNull('id');
+        $search = $request->input('q');
+        if ($search){
+            $allVat = Vat::where('province_name', 'LIKE', "%{$search}%")->orderBy('id', 'desc');
+                
+        } else {
+            $allVat = Vat::whereNotNull('id')->orderBy('id', 'desc');
 
-        if($request->has('province_name')){
-            $allVat = Vat::where('province_name', $request->province_name);
         }
-        if($request->has('federal_rate')){
-            $allVat = Vat::where('federal_rate', $request->federal_rate);
-        }
-        if($request->has('province_rate')){
-            $allVat = Vat::where('province_rate', $request->province_rate);
-        }
-       
+        
 
-        return $allVat->paginate(3)->toJson();
+        $vat = $allVat->paginate(3);
+        if($vat){
+            return $this->successResponse($vat);
+        }else{
+            return $this->successResponse(null, 'No Vat', 404);
+        }
     }
 
     
@@ -42,7 +45,19 @@ class VatController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'province_name' => 'bail|required|unique:vats|max:100',
+            'federal_rate' => 'bail|required|regex:/^\d+(\.\d{1,3})?$/',
+            'province_rate' => 'bail|required|regex:/^\d+(\.\d{1,3})?$/',
+           
+        ]);
+
         $vat = Vat::create($request->all());
+        if($vat){
+            return $this->successResponse($vat, 'Value Added Tax Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
        
     }
 
@@ -56,9 +71,9 @@ class VatController extends Controller
     {
         $vat = Vat::find($id);
         if ($vat){
-            return $vat->toJson();
+            return $this->successResponse($vat);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -73,8 +88,22 @@ class VatController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Vat::where('id', $id)
+        $request->validate([
+            'province_name' => 'bail|required|unique:vats,province_name, '. $id .'|max:100',
+            'federal_rate' => 'bail|required|regex:/^\d+(\.\d{1,3})?$/',
+            'province_rate' => 'bail|required|regex:/^\d+(\.\d{1,3})?$/',
+           
+        ]);
+
+        $result = Vat::where('id', $id)
                 ->update($request->all());
+
+        if ($result === 1){
+            $vat = Vat::find($id);
+            return $this->successResponse($vat, 'Vat Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -85,6 +114,13 @@ class VatController extends Controller
      */
     public function destroy($id)
     {
-        Vat::destroy($id);
+        $vat = Vat::find($id);
+        $vat->delete();
+
+        if ($vat->trashed()){
+            return $this->successResponse(null, 'Vat Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
     }
 }

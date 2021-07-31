@@ -86,7 +86,7 @@ class FeedbackAnswerController extends ApiController
 
 
     public function getAnswers($id){
-        $answers = FeedbackAnswer::where('feedback_id', $id)->get();
+        $answers = FeedbackAnswer::where('feedback_id', $id)->orderBy('id', 'desc')->get();
         //$newDateFormat = $answer->created_at->format('Y-m-d H:i:s');
         // dump($answer);
         // exit();
