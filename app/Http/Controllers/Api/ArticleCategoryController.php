@@ -18,18 +18,16 @@ class ArticleCategoryController extends ApiController
     public function index(Request $request)
     {
         $allArticleCategory = ArticleCategory::whereNotNull('id');
-        if($request->has('name')){
-            $allArticleCategory = ArticleCategory::where('name', $request->name);
-        }
-        if($request->has('parent_id')){
-            $allArticleCategory = ArticleCategory::where('parent_id', $request->parent_id);
-        }
-        if($request->has('description')){
-            $allArticleCategory = ArticleCategory::where('description', $request->description);
-        }
+        
 
 
-        return $allArticleCategory->paginate(3)->toJson();
+        $article_category = $allArticleCategory->paginate(3);
+
+        if($article_category){
+            return $this->successResponse($article_category);
+        }else{
+            return $this->successResponse(null, 'No Article Category', 404);
+        }
     }
 
 
@@ -42,6 +40,11 @@ class ArticleCategoryController extends ApiController
     public function store(Request $request)
     {
         $article_category = ArticleCategory::create($request->all());
+        if($article_category){
+            return $this->successResponse($article_category, 'Article Category Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
 
     }
 
@@ -55,9 +58,9 @@ class ArticleCategoryController extends ApiController
     {
         $article_category = ArticleCategory::find($id);
         if ($article_category){
-            return $article_category->toJson();
+            return $this->successResponse($article_category);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -72,8 +75,15 @@ class ArticleCategoryController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        ArticleCategory::where('id', $id)
+        $result = ArticleCategory::where('id', $id)
                        ->update($request->all());
+
+        if ($result === 1){
+            $employee = Employee::find($id);
+            return $this->successResponse($employee, 'Employee Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+            }
     }
 
     /**
@@ -88,5 +98,7 @@ class ArticleCategoryController extends ApiController
         foreach($result as $node){
             $node->delete();
         }
+
+        
     }
 }

@@ -3,30 +3,38 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Article;
 
 
-class ArticleController extends Controller
+class ArticleController extends ApiController
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $allArticle = Article::whereNotNull('id');
-        $allArticle = Article::with(['article_category']);
-
-        if($request->has('title')){
-            $allArticle = Article::where('title', $request->title);
-        }
-        if($request->has('article_category_id')){
-            $allArticle = Article::where('article_category_id', $request->article_category_id);
+       
+        $search = $request->input('q');
+        if ($search){
+            $allArticle = Article::with(['article_category'])
+                ->where('title', 'LIKE', "%{$search}%");
+              
+        } else {
+            $allArticle = Article::with(['article_category'])
+                ->whereNotNull('id')->orderBy('id', 'desc');
         }
         
-        return $allArticle->paginate(3)->toJson();
+        
+        $article = $allArticle->paginate(3);
+        if($article){
+            return $this->successResponse($article);
+        }else{
+            return $this->successResponse(null, 'No Article', 404);
+        }
     }
 
     
@@ -39,7 +47,19 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'bail|required|max:200',
+            'content' => 'bail|required',
+            'article_category_id' => 'required',
+            
+        ]);
+
         $article = Article::create($request->all());
+        if($article){
+            return $this->successResponse($article, 'Article Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
+        }
     }
 
     /**
@@ -52,10 +72,10 @@ class ArticleController extends Controller
     {
         $article = Article::find($id);
         if ($article){
-            $article->article_category = $article->article_category
-            return $article->toJson();
+            $article->article_category = $article->article_category;
+            return $this->successResponse($article);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -70,8 +90,21 @@ class ArticleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Article::where('id', $id)
+        $request->validate([
+            'title' => 'bail|required|max:200',
+            'content' => 'bail|required',
+            'article_category_id' => 'required',
+            
+        ]);
+        $result = Article::where('id', $id)
                 ->update($request->all());
+
+        if ($result === 1){
+            $article = Article::find($id);
+            return $this->successResponse($article, 'Article Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -82,6 +115,13 @@ class ArticleController extends Controller
      */
     public function destroy($id)
     {
-        Article::destroy($id);
+        $article = Article::find($id);
+        $article->delete();
+
+        if ($article->trashed()){
+            return $this->successResponse(null, 'Article Deleted');
+        }else{
+            return $this->errorResponse('Delete Failed', 401);
+        }
     }
 }
