@@ -24,4 +24,8 @@ class Customer extends Model
         //return $value === 0 ? "normal" : "unnormal";
     }
 
+    public function orders(){
+        return $this->hasMany(Order::class);
+    }
+
 }

@@ -3,14 +3,16 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductOrderFlash;
+use Illuminate\Database\Eloquent\Builder;
 
 
 
-class OrderController extends Controller
+class OrderController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -19,24 +21,29 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $allOrder = Order::whereNotNull('id');
-        $allOrder = Order::with(['vat', 'flashes']);
-
-
-        if($request->has('customer_id')){
-            $allOrder = Order::where('customer_id', $request->customer_id);
-        }
-        if($request->has('subtotal')){
-            $allOrder = Order::where('subtotal', '>', $request->subtotal);
-        }
-        if($request->has('vat_id')){
-            $allOrder = Order::where('vat_id', $request->vat_id);
-        }
-        if($request->has('status')){
-            $allOrder = Order::where('status', $request->status);
+       
+        $search = $request->input('q');
+        if ($search){
+            $allOrder = Order::with(['vat', 'flashes', 'customer'])
+                ->whereHas('customer', function (Builder $query) use($search){
+                    $query->where('name', 'LIKE', "%{$search}%");
+                })->orderBy('id', 'desc');
+                
+                // ->orWhere('vat->province_name', 'LIKE', "%{$search}%")
+                
+        } else {
+            $allOrder = Order::with(['vat', 'flashes', 'customer'])
+                ->whereNotNull('id')->orderBy('id', 'desc');
         }
 
-        return $allOrder->paginate(3)->toJson();
+        
+        $order = $allOrder->paginate(3);
+
+        if($order){
+            return $this->successResponse($order);
+        }else{
+            return $this->successResponse(null, 'No Order', 404);
+        }
     }
 
     
@@ -62,18 +69,26 @@ class OrderController extends Controller
         }
 
         $form['subtotal'] = $subtotal;
+        $order = Order::create($form);
         
-        $lastOrder = Order::create($form)->latest('id')->get();
-        // store data to the product-order-flash table
-        $orderId = $lastOrder[0]->id;
-        foreach ($infos as $x => $x_value){
-            $product = Product::where('id', $x)
-                             ->first()->toJson();
-            $flash = new ProductOrderFlash();
-            $flash->product_id = $x;
-            $flash->order_id = $orderId;
-            $flash->product_info = $product;
-            $flash->save();
+
+        if($order){
+            $lastOrder = Order::latest('id')->get();
+            // store data to the product-order-flash table
+            $orderId = $lastOrder[0]->id;
+            foreach ($infos as $x => $x_value){
+                $product = Product::where('id', $x)
+                                ->first()->toJson();
+                $flash = new ProductOrderFlash();
+                $flash->product_id = $x;
+                $flash->order_id = $orderId;
+                $flash->product_info = $product;
+                $flash->save();
+            }
+            
+            return $this->successResponse($order, 'Order Created', 201);
+        }else{
+            return $this->errorResponse('Store Failed', 401);
         }
 
     }
@@ -90,9 +105,10 @@ class OrderController extends Controller
         if ($order){
             $order->vat = $order->vat;
             $order->flashes = $order->flashes;
-            return $order->toJson();
+            $order->customer = $order->customer;
+            return $this->successResponse($order);
         }else{
-            return "Invalid Id !";
+            return $this->successResponse(null, "Invalid Id !", 404);
         }
     }
 
@@ -107,8 +123,15 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Order::where('id', $id)
+        $result = Order::where('id', $id)
                 ->update($request->all());
+        
+        if ($result === 1){
+            $order = Order::find($id);
+            return $this->successResponse($order, 'Order Updated');
+        }else{
+            return $this->errorResponse('Update Failed', 401);
+        }
     }
 
     /**
@@ -119,6 +142,13 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {
-       Order::destroy($id);
+       $order = Order::find($id);
+       $order->delete();
+
+       if ($order->trashed()){
+           return $this->successResponse(null, 'Order Deleted');
+       }else{
+           return $this->errorResponse('Delete Failed', 401);
+       }
     }
 }
